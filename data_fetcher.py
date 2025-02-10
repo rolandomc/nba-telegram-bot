@@ -27,3 +27,28 @@ def get_starting_lineup(team_name):
             latest_game = games['response'][0]
             return latest_game.get('starters', [])
     return None
+import psycopg2
+from config import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
+
+def connect_db():
+    """Conectar a la base de datos PostgreSQL."""
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        port=DB_PORT,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        dbname=DB_NAME
+    )
+    return conn
+
+def save_player_data(player_name, status):
+    """Guarda información del jugador en la base de datos."""
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO players (name, status) VALUES (%s, %s)",
+        (player_name, status)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
