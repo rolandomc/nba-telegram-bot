@@ -1,4 +1,9 @@
 # config.py
-TELEGRAM_BOT_TOKEN = "TU_TELEGRAM_BOT_TOKEN"
-NBA_API_KEY = "TU_NBA_API_KEY"
-NBA_API_HOST = "rapidapi.com"  # Ajusta según el proveedor de la API
+import os
+
+# Obtener el token de Telegram desde las variables de entorno
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+
+if not TELEGRAM_BOT_TOKEN:
+    print("¡Error! El token de Telegram no está configurado.")
+    exit(1)  # Termina el programa si no se encuentra el token

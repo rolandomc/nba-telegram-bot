@@ -2,9 +2,7 @@
 import logging
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext
-from config import TELEGRAM_BOT_TOKEN
-from data_fetcher import get_team_players, get_starting_lineup
-from utils import format_players
+from config import TELEGRAM_BOT_TOKEN  # Importar el token desde el archivo config
 
 # Configuración de logging
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
@@ -14,20 +12,19 @@ def start(update: Update, context: CallbackContext) -> None:
     update.message.reply_text("¡Hola! Soy tu bot de NBA. Usa /laker para obtener información.")
 
 def get_team_info(update: Update, context: CallbackContext) -> None:
-    """ Obtiene información de un equipo """
-    team_name = "Lakers"  # Puedes hacer que esto sea dinámico según el comando
-    players = get_team_players(team_name)
-    if players:
-        update.message.reply_text(format_players(players))
-
-def get_lineup(update: Update, context: CallbackContext) -> None:
-    """ Obtiene la alineación inicial del equipo """
-    team_name = "Lakers"
-    lineup = get_starting_lineup(team_name)
-    if lineup:
-        update.message.reply_text(f"🏀 **Quinteto Inicial de {team_name}**:\n" + "\n".join(lineup))
-    else:
-        update.message.reply_text("No se encontró la alineación inicial.")
+    """ Obtiene información de los jugadores de los Lakers """
+    team_name = "Lakers"  # Siempre puedes hacer que este comando sea dinámico, pero por ahora es fijo
+    players = [
+        {"name": "LeBron James", "status": "Activo", "position": "Alero"},
+        {"name": "Anthony Davis", "status": "Activo", "position": "Ala-pívot"},
+        {"name": "D'Angelo Russell", "status": "Activo", "position": "Base"},
+    ]  # Datos de ejemplo (puedes reemplazar con API real si deseas)
+    
+    msg = "📋 **Lista de Jugadores de los Lakers:**\n"
+    for player in players:
+        msg += f"🏀 {player['name']} - {player['position']} ({player['status']})\n"
+    
+    update.message.reply_text(msg)
 
 def main():
     """ Inicia el bot de Telegram """
@@ -36,7 +33,6 @@ def main():
 
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("laker", get_team_info))
-    dp.add_handler(CommandHandler("lineup", get_lineup))
 
     updater.start_polling()
     updater.idle()
