@@ -44,11 +44,14 @@ async def start(update: Update, context: CallbackContext) -> None:
 
 # Función principal que arranca el bot
 def main():
+    # Crear el objeto Application
     application = Application.builder().token(TELEGRAM_TOKEN).build()
 
+    # Agregar los manejadores de comandos
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("jugadores", jugadores))
 
+    # Iniciar el polling para recibir actualizaciones
     application.run_polling()
 
 if __name__ == '__main__':
