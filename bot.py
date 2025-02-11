@@ -115,8 +115,8 @@ def main():
         application.add_handler(CommandHandler("jugadores", jugadores))
 
         # Obtener la URL pública de Railway y configurar el webhook
-        # Asegúrate de que esta variable esté configurada correctamente en Railway
-        webhook_url = f"https://{os.getenv('RAILWAY_URL')}/{TELEGRAM_TOKEN}"
+        # Usar la variable RAILWAY_PUBLIC_DOMAIN proporcionada por Railway
+        webhook_url = f"https://{os.getenv('RAILWAY_PUBLIC_DOMAIN')}/{TELEGRAM_TOKEN}"
 
         # Configurar el webhook
         application.run_webhook(
