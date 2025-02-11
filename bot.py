@@ -1,41 +1,57 @@
-# bot.py
 import logging
+import requests
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext
-from config import TELEGRAM_BOT_TOKEN  # Importar el token desde el archivo config
+from bs4 import BeautifulSoup
 
-# Configuración de logging
-logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
+# Configurar el logging
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+logger = logging.getLogger(__name__)
 
+# Token de Telegram (deberías obtenerlo del BotFather)
+TELEGRAM_TOKEN = 'YOUR_BOT_TOKEN_HERE'
+
+# Función para obtener la información de jugadores lesionados o activos
+def obtener_info_jugadores():
+    url = 'https://twitter.com/Underdog__NBA'  # URL de la fuente
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    
+    # Aquí puedes extraer la información relevante del HTML
+    # Necesitas ajustar el scraping según la estructura de la página web
+    tweets = soup.find_all('div', {'class': 'tweet-text'})  # Este es solo un ejemplo
+    info = ""
+    
+    for tweet in tweets:
+        text = tweet.get_text()
+        if 'injury' in text.lower() or 'active' in text.lower():
+            info += text + '\n\n'
+    
+    if info == "":
+        info = "No hay actualizaciones recientes sobre jugadores lesionados o activos."
+    
+    return info
+
+# Comando para responder a /jugadores
+def jugadores(update: Update, context: CallbackContext) -> None:
+    info = obtener_info_jugadores()
+    update.message.reply_text(info)
+
+# Comando para iniciar el bot
 def start(update: Update, context: CallbackContext) -> None:
-    """ Mensaje de bienvenida """
-    update.message.reply_text("¡Hola! Soy tu bot de NBA. Usa /laker para obtener información.")
+    update.message.reply_text('¡Hola! Soy tu bot de NBA. Usa /jugadores para obtener información actualizada.')
 
-def get_team_info(update: Update, context: CallbackContext) -> None:
-    """ Obtiene información de los jugadores de los Lakers """
-    team_name = "Lakers"  # Siempre puedes hacer que este comando sea dinámico, pero por ahora es fijo
-    players = [
-        {"name": "LeBron James", "status": "Activo", "position": "Alero"},
-        {"name": "Anthony Davis", "status": "Activo", "position": "Ala-pívot"},
-        {"name": "D'Angelo Russell", "status": "Activo", "position": "Base"},
-    ]  # Datos de ejemplo (puedes reemplazar con API real si deseas)
-    
-    msg = "📋 **Lista de Jugadores de los Lakers:**\n"
-    for player in players:
-        msg += f"🏀 {player['name']} - {player['position']} ({player['status']})\n"
-    
-    update.message.reply_text(msg)
-
+# Función principal que arranca el bot
 def main():
-    """ Inicia el bot de Telegram """
-    updater = Updater(TELEGRAM_BOT_TOKEN, use_context=True)
-    dp = updater.dispatcher
+    updater = Updater(TELEGRAM_TOKEN)
 
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("laker", get_team_info))
+    dispatcher = updater.dispatcher
+    dispatcher.add_handler(CommandHandler("start", start))
+    dispatcher.add_handler(CommandHandler("jugadores", jugadores))
 
     updater.start_polling()
     updater.idle()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
