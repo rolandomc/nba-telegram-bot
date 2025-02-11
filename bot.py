@@ -105,7 +105,16 @@ def main():
     application = Application.builder().token(TELEGRAM_TOKEN).build()
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("jugadores", jugadores))
-    application.run_polling()
+
+    # Configurar el webhook (el URL debería ser el que proporciones para recibir las actualizaciones)
+    # Asegúrate de tener un servidor disponible para recibir las actualizaciones
+    # Asegúrate de agregar la URL de tu servicio (por ejemplo, Railway o un servidor en la nube)
+    application.run_webhook(
+        listen="0.0.0.0",  # Escuchar en todas las interfaces
+        port=5000,  # El puerto en el que el servidor escuchará las solicitudes
+        url_path=TELEGRAM_TOKEN,
+        webhook_url=f"https://{os.getenv('RAILWAY_URL')}/{TELEGRAM_TOKEN}"  # Cambia por el URL de tu servicio
+    )
 
 if __name__ == '__main__':
     main()
