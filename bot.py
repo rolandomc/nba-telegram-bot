@@ -1,5 +1,6 @@
 import logging
 import requests
+import os
 from telegram import Update
 from telegram.ext import Application, CommandHandler, CallbackContext
 from bs4 import BeautifulSoup
@@ -9,8 +10,12 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Token de Telegram (deberías obtenerlo del BotFather)
-TELEGRAM_TOKEN = 'YOUR_BOT_TOKEN_HERE'
+# Obtener el token desde la variable de entorno
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+
+# Verificar que el token se ha cargado correctamente
+if TELEGRAM_TOKEN is None:
+    raise ValueError("El token de Telegram no está configurado correctamente en las variables de entorno.")
 
 # Función para obtener la información de jugadores lesionados o activos
 def obtener_info_jugadores():
