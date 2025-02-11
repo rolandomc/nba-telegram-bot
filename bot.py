@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 
 # Configurar el logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
+                    level=logging.DEBUG)  # Cambié el nivel a DEBUG para obtener más detalles
 logger = logging.getLogger(__name__)
 
 # Obtener el token desde la variable de entorno
@@ -88,35 +88,45 @@ def obtener_info_basketball_reference():
 
 # Comando para responder a /jugadores
 async def jugadores(update: Update, context: CallbackContext) -> None:
-    info_x = obtener_info_x()  # De la API de X
-    info_espn = obtener_info_espn()  # De ESPN
-    info_basketball_reference = obtener_info_basketball_reference()  # De Basketball Reference
-    
-    # Combina toda la información obtenida
-    info_completa = f"{info_x}\n---\n{info_espn}\n---\n{info_basketball_reference}"
-    await update.message.reply_text(info_completa)
+    try:
+        info_x = obtener_info_x()  # De la API de X
+        info_espn = obtener_info_espn()  # De ESPN
+        info_basketball_reference = obtener_info_basketball_reference()  # De Basketball Reference
+
+        # Combina toda la información obtenida
+        info_completa = f"{info_x}\n---\n{info_espn}\n---\n{info_basketball_reference}"
+        await update.message.reply_text(info_completa)
+    except Exception as e:
+        logger.error(f"Error al obtener información: {e}")
+        await update.message.reply_text("Hubo un error al obtener la información. Intenta nuevamente más tarde.")
 
 # Comando para iniciar el bot
 async def start(update: Update, context: CallbackContext) -> None:
-    await update.message.reply_text('¡Hola! Soy tu bot de NBA. Usa /jugadores para obtener información actualizada.')
+    try:
+        await update.message.reply_text('¡Hola! Soy tu bot de NBA. Usa /jugadores para obtener información actualizada.')
+    except Exception as e:
+        logger.error(f"Error en el comando /start: {e}")
 
 # Función principal que arranca el bot
 def main():
-    application = Application.builder().token(TELEGRAM_TOKEN).build()
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("jugadores", jugadores))
+    try:
+        application = Application.builder().token(TELEGRAM_TOKEN).build()
+        application.add_handler(CommandHandler("start", start))
+        application.add_handler(CommandHandler("jugadores", jugadores))
 
-    # Obtener la URL pública de Railway y configurar el webhook
-    # Asegúrate de que esta variable esté configurada correctamente en Railway
-    webhook_url = f"https://{os.getenv('RAILWAY_URL')}/{TELEGRAM_TOKEN}"
-    
-    # Configurar el webhook
-    application.run_webhook(
-        listen="0.0.0.0",  # Escuchar en todas las interfaces
-        port=5000,  # El puerto en el que el servidor escuchará las solicitudes
-        url_path=TELEGRAM_TOKEN,
-        webhook_url=webhook_url
-    )
+        # Obtener la URL pública de Railway y configurar el webhook
+        # Asegúrate de que esta variable esté configurada correctamente en Railway
+        webhook_url = f"https://{os.getenv('RAILWAY_URL')}/{TELEGRAM_TOKEN}"
+
+        # Configurar el webhook
+        application.run_webhook(
+            listen="0.0.0.0",  # Escuchar en todas las interfaces
+            port=5000,  # El puerto en el que el servidor escuchará las solicitudes
+            url_path=TELEGRAM_TOKEN,
+            webhook_url=webhook_url
+        )
+    except Exception as e:
+        logger.error(f"Error al iniciar el bot: {e}")
 
 if __name__ == '__main__':
     main()
